@@ -1,0 +1,413 @@
+/* styles.css — оформление приложения «Отчёт по счетам». */
+/* Без CSS-фреймворков и препроцессоров (по правилам base.md). */
+
+:root {
+  --color-bg: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-muted: #5a6171;
+  --color-border: #e1e4ea;
+  --color-accent: #2a72d4;
+  --color-accent-hover: #1d5bb0;
+  --color-error-bg: #fdecea;
+  --color-error-fg: #b3261e;
+  --color-loading-bg: #eef3fb;
+  --color-loading-fg: #2a72d4;
+  --color-overdue: #b3261e;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: 14px/1.4 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.app-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--color-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.app-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ---- Filters ---- */
+
+.filters {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.2fr) minmax(220px, 1fr) minmax(220px, 1fr) minmax(180px, 0.8fr);
+  gap: 16px;
+  padding: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0; /* позволяет дочерним flex-элементам корректно сжиматься в grid-ячейке */
+}
+
+.filter-col-title {
+  color: var(--color-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.filter-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  min-width: 0;
+}
+
+.filter-label {
+  color: var(--color-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.filter-field select,
+.filter-field input {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 14px;
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.filter-field select:focus,
+.filter-field input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(42, 114, 212, 0.15);
+}
+
+.filter-buttons {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: end;
+  padding-top: 4px;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-export {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  border: 1px solid transparent;
+}
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) { background: var(--color-accent-hover); }
+.btn-secondary {
+  background: #fff;
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+.btn-secondary:hover:not(:disabled) { background: #f3f4f7; }
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.filter-hint {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+/* ---- KPI «% сбора дебиторки» ---- */
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--color-loading-bg);
+  min-width: 0;
+}
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+}
+.kpi-note {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+/* ---- Tabs ---- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+.tab {
+  padding: 10px 16px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--color-text); }
+.tab[aria-selected="true"] {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+.tab:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+.btn-export {
+  background: #fff;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.btn-export:hover:not(:disabled) {
+  background: var(--color-accent);
+  color: #fff;
+}
+.btn-export:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---- Status / banners ---- */
+
+.status:empty { display: none; }
+.status {
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--color-loading-bg);
+  color: var(--color-loading-fg);
+  border: 1px solid transparent;
+}
+.status.error {
+  background: var(--color-error-bg);
+  color: var(--color-error-fg);
+  border-color: rgba(179, 38, 30, 0.25);
+}
+.status.loading::after {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+  border: 2px solid var(--color-loading-fg);
+  border-top-color: transparent;
+  border-radius: 50%;
+  vertical-align: middle;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- Report table ---- */
+
+.report-wrapper {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  /* Без overflow: иначе обёртка станет scroll-контейнером и sticky шапка/«Итого»
+     перестанут липнуть к окну. Скругления углов — вручную на thead/tfoot. */
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.report-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f8f9fb;
+  border-bottom: 2px solid var(--color-border);
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 1;
+}
+.report-table th.sortable { cursor: pointer; user-select: none; }
+.report-table th.sortable:hover { background: #eef0f4; }
+.report-table th.sortable:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+  background: #eef0f4;
+}
+.report-table th.align-right,
+.report-table td.align-right { text-align: right; }
+
+.report-table tbody td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+.report-table tbody tr:hover { background: #fafbfd; }
+.report-table tbody tr:last-child td { border-bottom: none; }
+
+.report-table .col-name a {
+  color: var(--color-accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+.report-table .col-name a:hover { text-decoration: underline; }
+
+.cell-overdue { color: var(--color-overdue); font-weight: 600; }
+
+.report-table tfoot td {
+  position: sticky;
+  bottom: 0;
+  background: #f4f7fb;
+  border-top: 2px solid var(--color-border);
+  padding: 10px 12px;
+  font-weight: 700;
+  z-index: 1;
+}
+
+.report-table thead th:first-child { border-top-left-radius: 8px; }
+.report-table thead th:last-child { border-top-right-radius: 8px; }
+.report-table tfoot td:first-child { border-bottom-left-radius: 8px; }
+.report-table tfoot td:last-child { border-bottom-right-radius: 8px; }
+
+.report-table td.empty-state {
+  text-align: center;
+  color: var(--color-muted);
+  padding: 32px 16px;
+  font-style: italic;
+}
+
+/* ---- Pagination ---- */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+.pagination button {
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+.pagination button:hover:not(:disabled) {
+  background: #f3f4f7;
+  border-color: var(--color-accent);
+}
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.page-indicator {
+  color: var(--color-muted);
+  font-size: 13px;
+  min-width: 80px;
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 1100px) {
+  .filters { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 720px) {
+  .app-main { padding: 16px 12px 32px; }
+  .filters { grid-template-columns: 1fr; padding: 12px; }
+  .report-wrapper { overflow-x: auto; }
+}
+
+/* Широкий экран (в т.ч. iframe портала на мониторе 1920): фильтры справа столбиком. */
+@media (min-width: 1200px) {
+  .app-main {
+    max-width: 1600px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    /* Лишнюю высоту столбика фильтров забирает последняя строка, а не зазоры между блоками. */
+    grid-template-rows: auto auto auto auto 1fr;
+    align-items: start;
+  }
+  .app-main > * { grid-column: 1; }
+  .app-main > #filters {
+    grid-column: 2;
+    grid-row: 1 / span 5;
+    position: sticky;
+    top: 16px;
+  }
+  .filters { grid-template-columns: 1fr; }
+}

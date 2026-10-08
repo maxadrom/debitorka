@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дебиторка — Битрикс24</title>
+  <link rel="icon" href="manifest/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="vendor/flatpickr.min.css">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Битрикс24 JS SDK: реально загружается только на портале. В dev — 404 игнорируется. -->
+  <script src="https://api.bitrix24.com/api/v1/"></script>
+
+  <!-- Vendor: flatpickr (выбор даты). defer сохраняет порядок: выполнится до app.js (модули тоже отложены). -->
+  <script defer src="vendor/flatpickr.min.js"></script>
+  <script defer src="vendor/flatpickr.l10n.ru.js"></script>
+
+  <!-- Vendor: SheetJS (XLSX-экспорт) не подключаем здесь — xlsx-export.js грузит его при первом экспорте. -->
+
+  <!-- DEV-ONLY: подставляет window.B24_WEBHOOK_URL. В production файл отсутствует — 404 игнорируется. -->
+  <script src="dev-config.local.js"></script>
+
+  <!-- Точка входа приложения (ES Module) -->
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-logo" aria-hidden="true">₽</div>
+    <h1 class="app-title">Дебиторка</h1>
+  </header>
+
+  <main class="app-main">
+    <form id="filters" class="filters" autocomplete="off">
+      <!-- Форма фильтров рендерится модулем filters-ui.js -->
+    </form>
+
+    <div id="tabs" class="tabs" role="tablist" aria-label="Вид отчёта"></div>
+
+    <div id="status" class="status" role="status" aria-live="polite">
+      <!-- Сюда рендерится баннер ошибок и индикатор загрузки -->
+    </div>
+
+    <div class="report-wrapper">
+      <table id="report" class="report-table">
+        <thead></thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+      </table>
+    </div>
+
+    <nav id="pagination" class="pagination" aria-label="Пагинация отчёта">
+      <!-- Контролы пагинации рендерятся модулем table.js -->
+    </nav>
+
+    <div class="actions">
+      <!-- Кнопка включается в table.renderReport, когда есть отчёт. -->
+      <button id="export-xlsx" type="button" class="btn-export" disabled>Экспорт XLSX</button>
+    </div>
+  </main>
+</body>
+</html>

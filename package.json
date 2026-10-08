@@ -1,0 +1,17 @@
+{
+  "name": "fin25-otch",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "author": "Maksim Okhapkin",
+  "type": "module",
+  "description": "Локальное приложение Битрикс24: отчёт по счетам в разрезе контактов.",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "pack": "node pack.mjs",
+    "dev:setup": "node scripts/dev-setup.mjs"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1"
+  }
+}

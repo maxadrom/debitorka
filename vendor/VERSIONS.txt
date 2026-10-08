@@ -1,0 +1,9 @@
+# Vendor library versions
+#
+# При обновлении: скачать целиком с официального источника и заменить файл.
+# Не править содержимое vendor-файлов вручную.
+
+xlsx.full.min.js       SheetJS Community Edition 0.20.3   https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js
+flatpickr.min.js       flatpickr 4.6.13                   https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js
+flatpickr.min.css      flatpickr 4.6.13 (styles)          https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css
+flatpickr.l10n.ru.js   flatpickr 4.6.13 (RU locale)       https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ru.js

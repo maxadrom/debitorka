@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude_ai_b24-dev-mcp__bitrix-method-details",
+      "mcp__claude_ai_b24-dev-mcp__bitrix-app-development-doc-details",
+      "mcp__github__search_repositories",
+      "Read(//tmp/**)",
+      "Bash(python3 -c ' *)",
+      "Bash(command -v python3)",
+      "Bash(command -v python)"
+    ]
+  }
+}

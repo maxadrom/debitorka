@@ -1,0 +1,24 @@
+# Секреты разработчика
+.env
+.env.local
+dev-config.local.js
+.claude/settings.local.json
+# Личная конфигурация MCP-серверов разработчика
+.mcp.json
+
+# Билд-артефакты
+node_modules/
+dist/
+*.zip
+
+# Кеш тестов
+tests/.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+backup/
