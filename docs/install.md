@@ -5,8 +5,8 @@
 ## Шаг 1. Собрать ZIP-артефакт
 
 ```bash
-npm install   # один раз — ставит archiver
-npm run pack  # → dist/fin25_otch.zip
+npm run pack  # → dist/<APP_CODE>.zip (APP_CODE — в modules/application/portal-config.js)
+              # archiver необязателен: без npm install архив соберёт системный zip
 ```
 
 Проверьте вывод: размер должен быть ≤ 500 KB. Sanity-check автоматически отклоняет архив, если в него попали файлы из blacklist (`.env`, `dev-config.local.js`, `tests/`, `*.md`, `package.json`, `node_modules` и т. д.).
@@ -16,11 +16,11 @@ npm run pack  # → dist/fin25_otch.zip
 1. Откройте портал → раздел **Приложения**.
 2. **Разработчикам → Другое → Локальное приложение** (или прямой URL: `<portal>/marketplace/local/`).
 3. Заполните поля:
-   - **Код приложения:** `fin25_otch` (любой уникальный).
+   - **Код приложения:** `<APP_CODE>` (любой уникальный).
    - **Название:** `Отчёт по счетам`.
    - **Тип размещения:** обычно «В разделе CRM» либо «Самостоятельное приложение».
    - **Доступные права:** `crm`, `user`. Этого хватает для `crm.item.list` (entityTypeId=31), `crm.contact.list`, `user.get`.
-4. **Загрузить ZIP-архив** → выберите `dist/fin25_otch.zip`.
+4. **Загрузить ZIP-архив** → выберите `dist/<APP_CODE>.zip`.
 5. Сохраните.
 
 ## Шаг 3. Открыть приложение
