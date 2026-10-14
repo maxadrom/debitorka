@@ -19,8 +19,9 @@ npm run dev:setup                          # .env → dev-config.local.js (windo
 npm run portal:probe                       # разведка портала + проверка portal-config.js
 npm run check:live -- 2026-10-01 2026-10-31 # «Итого» с живого портала (вебхук из .env)
 npm run b24 -- <метод> '<JSON>'             # один REST-запрос (POST JSON)
-# dev-сервер: .claude/launch.json → «static» (python без кеша, порт 8081) → http://localhost:8081/index.html
-# простой `python3 -m http.server` тоже работает, но кеширует ES-модули — после правок нужен hard reload
+npm run dev:setup -- <URL>                 # записать присланный вебхук в .env и сгенерировать конфиг
+npm run serve                              # dev-сервер без кеша (Node) → http://localhost:8081/index.html
+# в Claude Code — .claude/launch.json → «static» (тот же scripts/serve.mjs). Python не нужен, ничего не ставить в систему
 ```
 
 После `npm run pack` проверять `unzip -l dist/<APP_CODE>.zip`: не должно быть `.env`, `dev-config*`, `tests/`, `*.md`, `package.json`.

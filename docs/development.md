@@ -23,9 +23,13 @@
 ```bash
 git clone https://github.com/maxadrom/debitorka.git
 cd debitorka
-npm install                # ставит archiver (нужен только для npm run pack)
-cp .env.example .env       # подставьте свой B24_WEBHOOK_URL
-npm run dev:setup          # сгенерирует dev-config.local.js
+npm run dev:setup -- https://<портал>/rest/<ID>/<токен>/   # запишет вебхук в .env и сгенерирует dev-config.local.js
+```
+
+Нужны только git и Node.js 20+; Python и глобальные пакеты не нужны. `npm install` (archiver в локальный `node_modules`) — только если для `npm run pack` нет системной утилиты `zip` (Windows).
+
+```bash
+npm run dev:setup          # если .env правили вручную — перегенерировать dev-config.local.js
 ```
 
 `dev-config.local.js` — это маленький файл, выставляющий `window.B24_WEBHOOK_URL`. Он подключается в `index.html` ДО `app.js`, чтобы при старте `app.js` webhook уже был доступен. **В production файла нет** — браузер вернёт 404, `window.B24_WEBHOOK_URL` останется `undefined`, режим переключится в `portal`.
@@ -37,7 +41,8 @@ npm run dev:setup          # сгенерирует dev-config.local.js
 1. На портале `<portal>.bitrix24.ru`: **Приложения → Разработчикам → Другое → Входящий вебхук**.
 2. Дайте права только `crm` и `user`.
 3. Скопируйте URL вида `https://<portal>.bitrix24.ru/rest/<USER_ID>/<TOKEN>/`.
-4. Вставьте в `.env`, запустите `npm run dev:setup`.
+4. `npm run dev:setup -- <URL>` (или впишите в `.env` и запустите `npm run dev:setup`).
+5. После работ удалите вебхук на портале — [adapt-to-portal.md](adapt-to-portal.md), шаг 8.
 
 После работ удалите вебхук: **Разработчикам → «Интеграции»** → вебхук → **Удалить** (подробнее — [adapt-to-portal.md](adapt-to-portal.md), шаг 8).
 
@@ -45,18 +50,11 @@ npm run dev:setup          # сгенерирует dev-config.local.js
 
 ## Запуск приложения локально
 
-Основной путь — конфигурация «static» из `.claude/launch.json`: Python-сервер с заголовком `Cache-Control: no-store` на порту 8081 → `http://localhost:8081/index.html`. Без кеша важно: обычный `python3 -m http.server` кеширует ES-модули, и после правок браузер может грузить старые `modules/*.js`.
-
-Альтернативы (работают, но после правок нужен hard reload):
-
 ```bash
-# вариант 1: встроенный модуль Python (кеширует модули)
-python3 -m http.server 8081
-# → http://localhost:8081/index.html
-
-# вариант 2: npx
-npx serve .
+npm run serve          # → http://localhost:8081/index.html (PORT=8090 npm run serve — другой порт)
 ```
+
+`scripts/serve.mjs` — статический сервер на Node без зависимостей, с заголовком `Cache-Control: no-store`: после правок браузер всегда берёт свежие `modules/*.js`, hard reload не нужен. `.env` он не отдаёт. В Claude Code тот же сервер запускается конфигурацией «static» из `.claude/launch.json`. Python для разработки не нужен.
 
 Прямое открытие через `file://` тоже работает в большинстве браузеров, но `BX24.js` загружается с `https://api.bitrix24.com/api/v1/`, поэтому может потребоваться cors-relaxed окружение. Сервер на localhost — стабильнее.
 
