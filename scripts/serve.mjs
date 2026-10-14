@@ -47,6 +47,15 @@ const server = createServer(async (req, res) => {
   }
 });
 
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`[serve] порт ${PORT} занят другим процессом. Чужой процесс не останавливай — `
+      + `запусти на другом порту: PORT=${PORT + 1} npm run serve`);
+    process.exit(1);
+  }
+  throw err;
+});
+
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`[serve] http://localhost:${PORT}/index.html (Ctrl+C — остановить)`);
 });

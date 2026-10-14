@@ -17,8 +17,8 @@ node --test --test-name-pattern="оплаченный" tests/aggregator.test.js 
 npm run pack                               # → dist/<APP_CODE>.zip (whitelist + sanity-check + лимит 500 KB; без npm install — системный zip)
 npm run dev:setup                          # .env → dev-config.local.js (window.B24_WEBHOOK_URL)
 npm run portal:probe                       # разведка портала + проверка portal-config.js
-npm run check:live -- 2026-10-01 2026-10-31 # «Итого» с живого портала (вебхук из .env)
-npm run b24 -- <метод> '<JSON>'             # один REST-запрос (POST JSON)
+npm run check:live -- 2026-10-01 2026-10-31 # «Итого» + независимая сверка; период — месяц, максимум квартал
+npm run b24 -- <метод> '<JSON>'             # один REST-запрос (POST JSON), только чтение
 npm run dev:setup -- <URL>                 # записать присланный вебхук в .env и сгенерировать конфиг
 npm run serve                              # dev-сервер без кеша (Node) → http://localhost:8081/index.html
 # в Claude Code — .claude/launch.json → «static» (тот же scripts/serve.mjs). Python не нужен, ничего не ставить в систему
@@ -73,6 +73,9 @@ app.js (composition root) → modules/presentation/* → modules/application/* �
 - Никаких внешних CDN, кроме `BX24.js` с `api.bitrix24.com`.
 
 ## Секреты
+
+Через вебхук — только чтение (`*.list`, `*.get`, `*.fields`); изменять данные портала — только по явной просьбе пользователя. Сверка — `check:live` месяцем, максимум кварталом, свои скрипты пересчёта не писать.
+
 
 `B24_WEBHOOK_URL` живёт в `.env` и `dev-config.local.js` (оба в `.gitignore` и в blacklist `pack.mjs`, который ещё и грепает архив на webhook-паттерн). Не печатать его в чат, логи, коммиты; скрипты в `scripts/` читают его из `.env`.
 

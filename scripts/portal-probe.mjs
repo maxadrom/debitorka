@@ -109,7 +109,9 @@ for (const [name] of payCandidates) {
   info(`${name}: заполнено у ${filled} из ${sample} последних оплаченных счетов`);
   if (filled > 0 && !suggested.PAY_DATE_FIELD) suggested.PAY_DATE_FIELD = name;
 }
-if (!suggested.PAY_DATE_FIELD) {
+const payDecided = PORTAL.PAY_DATE_FIELD && fields[PORTAL.PAY_DATE_FIELD]
+  && (await fillRate(PORTAL.PAY_DATE_FIELD)).filled > 0;
+if (!suggested.PAY_DATE_FIELD && !payDecided) {
   questions.push('Поля «Дата оплаты» нет или оно пустое у оплаченных счетов. Что считать датой оплаты? '
     + 'Варианты — docs/adapt-to-portal.md, «Рекомендации: если поля даты оплаты нет».');
 }
@@ -118,7 +120,7 @@ if (!suggested.PAY_DATE_FIELD) {
 console.log('\n4. Наши ЮЛ (IS_MY_COMPANY = Y)');
 const my = await call('crm.company.list', { filter: { IS_MY_COMPANY: 'Y' }, select: ['ID'] });
 info(`компаний: ${my.total}`);
-if (my.total > 1) {
+if (my.total > 1 && !PORTAL.MY_COMPANY_FIELD) {
   questions.push(`Наших ЮЛ ${my.total}. Нужен фильтр «Наше ЮЛ» (поле счёта mycompanyId)? `
     + 'Рецепт — docs/adapt-to-portal.md, «Рекомендации: фильтр „Наше ЮЛ“».');
 }
@@ -142,6 +144,16 @@ if (payField && (payField.type === 'date' || payField.type === 'datetime')) {
 } else {
   bad(`PAY_DATE_FIELD = '${PORTAL.PAY_DATE_FIELD}' — такого поля date/datetime у счетов нет`
     + (suggested.PAY_DATE_FIELD ? `; предлагается '${suggested.PAY_DATE_FIELD}'` : ''));
+}
+
+// Код приложения и имя ZIP: у каждого портала свой.
+const ORIGINAL_APP_CODE = 'fin25_otch';
+const subdomain = new URL(WEBHOOK).hostname.split('.')[0].replace(/[^a-z0-9]/gi, '_').toLowerCase();
+const suggestedCode = `debitorka_${subdomain}`;
+if (!PORTAL.APP_CODE || PORTAL.APP_CODE === ORIGINAL_APP_CODE) {
+  bad(`APP_CODE = '${PORTAL.APP_CODE}' — код исходного портала; задайте свой, предлагается '${suggestedCode}'`);
+} else {
+  ok(`APP_CODE = '${PORTAL.APP_CODE}' (архив dist/${PORTAL.APP_CODE}.zip)`);
 }
 
 if (questions.length) {
