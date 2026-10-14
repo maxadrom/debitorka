@@ -9,7 +9,10 @@
   "scripts": {
     "test": "node --test tests/*.test.js",
     "pack": "node pack.mjs",
-    "dev:setup": "node scripts/dev-setup.mjs"
+    "dev:setup": "node scripts/dev-setup.mjs",
+    "portal:probe": "node scripts/portal-probe.mjs",
+    "check:live": "node scripts/live-check.mjs",
+    "b24": "node scripts/b24.mjs"
   },
   "devDependencies": {
     "archiver": "^7.0.1"

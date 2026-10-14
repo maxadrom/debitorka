@@ -30,7 +30,7 @@
 ## Технологический стек
 
 - **Язык программирования:** Vanilla JavaScript (ES2020), без сборщика и фреймворков.
-- **Платформа:** Битрикс24 JS SDK (`BX24.callMethod`, `BX24.callBatch`, `BX24.openSlider`) через `https://api.bitrix24.com/api/v1/`.
+- **Платформа:** Битрикс24 JS SDK (`BX24.callMethod`, `BX24.callBatch`, `BX24.openPath`) через `https://api.bitrix24.com/api/v1/`.
 - **REST API:** `crm.item.list` (entityTypeId=31, Smart Invoice 2.0), `crm.contact.list`, `user.get`; классический `batch`.
 - **Vendor-библиотеки (загружаются локально из `vendor/`):**
   - `xlsx.full.min.js` (SheetJS) — экспорт XLSX; грузится лениво, при первом экспорте.

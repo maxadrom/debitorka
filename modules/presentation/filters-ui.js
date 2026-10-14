@@ -116,7 +116,7 @@ export function mountFilters({ container, initial, onSubmit }) {
     el('span', { class: 'filter-hint', text: 'Только те, у кого есть счета за период' })
   );
 
-  // Срок оплаты (closedate) и дата оплаты (ufCrmSmartInvoiceDatePay), значения — ISO.
+  // Срок оплаты (closedate) и дата оплаты (PORTAL.PAY_DATE_FIELD), значения — ISO.
   const closeFrom = dateInput('filter-close-from', initial.closedateFrom);
   const closeTo = dateInput('filter-close-to', initial.closedateTo);
   const payFrom = dateInput('filter-pay-from', initial.datePayFrom);

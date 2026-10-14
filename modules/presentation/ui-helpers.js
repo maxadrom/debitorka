@@ -4,7 +4,7 @@
 // Общие хелперы UI: баннер ошибок, индикатор загрузки, открытие слайдера контакта,
 // форматирование денег, экранирование HTML.
 //
-// Не импортирует api-client напрямую: открытие слайдера через window.BX24 (если есть)
+// Не импортирует api-client напрямую: открытие слайдера через window.BX24.openPath (если есть)
 // или window.open (в dev). Это единственное место, где presentation касается окружения.
 
 import { logDebug, PORTAL_ORIGIN } from '../env.js';
@@ -52,14 +52,23 @@ export function showStatus(message) {
 }
 
 /**
- * Открывает карточку контакта в слайдере (на портале) или в новой вкладке (в dev).
+ * Открывает карточку контакта в слайдере портала (BX24.openPath) или в новой вкладке:
+ * в dev, а также если слайдер не открылся (например, в мобильном приложении).
+ * Метода BX24.openSlider в SDK нет — только openPath.
  * @param {number} contactId
  */
 export function openContactSlider(contactId) {
   const path = `/crm/contact/details/${contactId}/`;
-  if (typeof window.BX24?.openSlider === 'function') {
+  const bx = window.BX24;
+  if (typeof bx?.openPath === 'function') {
     logDebug(`[ui.openContactSlider] id=${contactId} mode=portal`);
-    window.BX24.openSlider({ url: path });
+    bx.openPath(path, (res) => {
+      if (res?.result !== 'error') return;
+      logDebug(`[ui.openContactSlider] openPath failed: ${res.errorCode}`);
+      const domain = typeof bx.getDomain === 'function' ? bx.getDomain() : null;
+      if (domain) window.open(`https://${domain}${path}`, '_blank', 'noopener,noreferrer');
+      else showError('Не удалось открыть карточку контакта.');
+    });
     return;
   }
   logDebug(`[ui.openContactSlider] id=${contactId} mode=dev`);

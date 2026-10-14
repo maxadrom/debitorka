@@ -13,14 +13,17 @@ Vanilla JS (ES2020, ES Modules), без сборщика и фреймворко
 ```bash
 npm test                                   # все тесты: node --test tests/*.test.js
 node --test tests/aggregator.test.js       # один файл
-node --test --test-name-pattern="DT31_5:S" tests/aggregator.test.js   # тесты по подстроке имени
-npm run pack                               # → dist/fin25_otch.zip (whitelist + sanity-check + лимит 500 KB)
+node --test --test-name-pattern="оплаченный" tests/aggregator.test.js   # тесты по подстроке имени
+npm run pack                               # → dist/<APP_CODE>.zip (whitelist + sanity-check + лимит 500 KB; без npm install — системный zip)
 npm run dev:setup                          # .env → dev-config.local.js (window.B24_WEBHOOK_URL)
+npm run portal:probe                       # разведка портала + проверка portal-config.js
+npm run check:live -- 2026-10-01 2026-10-31 # «Итого» с живого портала (вебхук из .env)
+npm run b24 -- <метод> '<JSON>'             # один REST-запрос (POST JSON)
 # dev-сервер: .claude/launch.json → «static» (python без кеша, порт 8081) → http://localhost:8081/index.html
 # простой `python3 -m http.server` тоже работает, но кеширует ES-модули — после правок нужен hard reload
 ```
 
-После `npm run pack` проверять `unzip -l dist/fin25_otch.zip`: не должно быть `.env`, `dev-config*`, `tests/`, `*.md`, `package.json`.
+После `npm run pack` проверять `unzip -l dist/<APP_CODE>.zip`: не должно быть `.env`, `dev-config*`, `tests/`, `*.md`, `package.json`.
 
 ## Архитектура
 
@@ -37,6 +40,10 @@ app.js (composition root) → modules/presentation/* → modules/application/* �
 - **`filters.js`** — состояние фильтров, зеркалится в URL через `history.replaceState`. По умолчанию — текущий месяц по `closedate`.
 - **`table.js`** — вкладки «Дебиторка по клиентам» / «Дебиторка по сотрудникам» (фильтры общие; переключение без перезагрузки — по последнему результату `loadReport`; вкладка в URL не хранится). 100 строк/страница, сортировка по имени (ru) по умолчанию, строка «Итого» по **всем** отфильтрованным строкам (на обеих вкладках совпадает). XLSX выгружает активную вкладку: все строки + «Итого» (`debt_clients_YYYY-MM-DD.xlsx` / `debt_staff_YYYY-MM-DD.xlsx`).
 - **`filters-ui.js`** — форма фильтров и KPI «% сбора дебиторки» вверху панели (`setKpi`); список ответственных обновляется после каждой загрузки отчёта (`setAssignees`).
+
+## Адаптация под другой портал
+
+Только по `docs/adapt-to-portal.md`: значения портала — только в `modules/application/portal-config.js` (`PORTAL`), приложение и вёрстку не переписывать, `npm run portal:probe` → вопросы человеку → конфиг → `npm test` + `check:live` + проверка в настоящем браузере → pack → напомнить удалить вебхук. Рецепты (нет поля даты оплаты → `movedTime`, фильтр «Наше ЮЛ», несколько воронок) — там же, только после решения человека.
 
 ## Бизнес-правила (не менять без явного решения пользователя)
 
