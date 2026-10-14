@@ -5,6 +5,10 @@
 // Всегда POST JSON: GET и form-urlencoded молча игнорируют операторы фильтра (>=, !=, @).
 // Вебхук не печатается.
 //
+// ТОЛЬКО ЧТЕНИЕ: пропускаются методы *.list / *.get / *.fields и scope. Методы записи
+// (add, update, delete, set, …) и batch блокируются. Флаг --write снимает блок — только
+// если человек в чате явно попросил изменить данные на портале.
+//
 //   npm run b24 -- crm.category.list '{"entityTypeId":31}'
 //   npm run b24 -- crm.status.list '{"filter":{"ENTITY_ID":"SMART_INVOICE_STAGE_2"}}'
 //   npm run b24 -- crm.item.list '{"entityTypeId":31,"filter":{">=closedate":"2026-10-01"},"select":["id"]}'
@@ -19,9 +23,17 @@ if (!match) {
   console.error('[b24] B24_WEBHOOK_URL не задан в .env');
   process.exit(1);
 }
-const [method, params = '{}'] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const allowWrite = args.includes('--write');
+const [method, params = '{}'] = args.filter((a) => a !== '--write');
 if (!method) {
   console.error('Использование: npm run b24 -- <метод> \'<JSON-параметры>\'');
+  process.exit(1);
+}
+const READ_ONLY = /^(scope|methods|profile)$|\.(list|get|fields|getlist|getfields)$/i;
+if (!READ_ONLY.test(method) && !allowWrite) {
+  console.error(`[b24] ${method}: заблокировано — через вебхук разрешено только чтение (*.list, *.get, *.fields).`
+    + ' Изменять данные портала можно только по явной просьбе человека (тогда — флаг --write).');
   process.exit(1);
 }
 const webhook = match[1].endsWith('/') ? match[1] : `${match[1]}/`;
