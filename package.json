@@ -12,7 +12,8 @@
     "dev:setup": "node scripts/dev-setup.mjs",
     "portal:probe": "node scripts/portal-probe.mjs",
     "check:live": "node scripts/live-check.mjs",
-    "b24": "node scripts/b24.mjs"
+    "b24": "node scripts/b24.mjs",
+    "serve": "node scripts/serve.mjs"
   },
   "devDependencies": {
     "archiver": "^7.0.1"

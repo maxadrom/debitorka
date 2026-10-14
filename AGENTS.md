@@ -23,14 +23,16 @@ npm install                 # необязательно: archiver для упа
 npm test                    # node --test tests/*.test.js — без сети, REST замокан
 npm run pack                # → dist/<APP_CODE>.zip (whitelist, проверка на утечку webhook, лимит 500 KB)
 npm run dev:setup           # .env → dev-config.local.js (window.B24_WEBHOOK_URL)
+npm run dev:setup -- <URL>  # записать присланный человеком вебхук в .env и сгенерировать конфиг
+npm run serve               # локальный сервер без кеша: http://localhost:8081/index.html
 npm run portal:probe        # разведка портала: стадии, поле даты оплаты, наши ЮЛ; проверка portal-config.js
 npm run check:live -- 2026-10-01 2026-10-31   # «Итого» с живого портала тем же loadReport, что в браузере
 npm run b24 -- <метод> '<JSON>'               # один REST-запрос (всегда POST JSON)
 ```
 
-Локальный запуск: любой статический сервер в корне, например
-`python3 -m http.server 8081` → `http://localhost:8081/index.html`.
-Обычный `http.server` кеширует ES-модули — после правок делай hard reload (в `.claude/launch.json` есть вариант без кеша).
+Локальный запуск: `npm run serve` → `http://localhost:8081/index.html` (Node, без кеша, без зависимостей).
+
+Окружение — только git и Node.js 20+. Ничего не ставь в систему: ни Python, ни Homebrew/apt/choco, ни pip, ни `npm install -g`. Нет git или Node 20+ — остановись и скажи человеку.
 
 ## Два режима работы
 
@@ -119,6 +121,7 @@ app.js (composition root)
 ## Секреты и данные — обязательно
 
 - Вебхук (`https://<portal>/rest/<id>/<token>/`) — это пароль. Он живёт только в `.env` и `dev-config.local.js` (оба в `.gitignore`, `pack.mjs` их не пакует и ещё грепает архив на шаблон вебхука).
+- Если человек прислал вебхук в чат — сохрани его `npm run dev:setup -- <URL>`; дальше скрипты читают его из `.env`, сам URL не повторяй.
 - Никогда не печатай вебхук в чат, логи, коммиты, документацию. В логах — только факт наличия (`hasWebhookConfig=true`).
 - Вебхуку нужны только права `crm` и `user`. После работ человек удаляет его на портале — напомни об этом в итоговом сообщении.
 - Не коммить реальные ФИО, суммы и прочие данные клиентов портала — в тестах и документации только вымышленные.

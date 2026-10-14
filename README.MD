@@ -43,25 +43,22 @@
 
 ## Быстрый старт (разработчику)
 
+Нужны только git и Node.js 20+. Python, Homebrew и глобальные npm-пакеты не нужны.
+
 ```bash
-# 1. Зависимости необязательны: archiver для сборки ZIP (без него — системный zip)
-npm install
-
-# 2. Создать .env с webhook (только для локальной разработки)
-cp .env.example .env
-# отредактировать .env, подставить B24_WEBHOOK_URL
-
-# 3. Сгенерировать dev-config.local.js (читает .env)
-npm run dev:setup
-
-# 4. Открыть index.html через локальный сервер: .claude/launch.json → «static»
-#    (без кеша, http://localhost:8081/index.html; подробнее — docs/development.md)
-
-# 5. Тесты
+# 1. Тесты (без сети)
 npm test
 
-# 6. Сборка ZIP для загрузки в Битрикс24
+# 2. Вебхук портала (права crm и user) → .env и dev-config.local.js
+npm run dev:setup -- https://<портал>.bitrix24.ru/rest/<ID>/<токен>/
+
+# 3. Локальный сервер без кеша → http://localhost:8081/index.html
+npm run serve
+
+# 4. Сборка ZIP для загрузки в Битрикс24 (на Windows без zip — сначала npm install в папке проекта)
 npm run pack          # → dist/<APP_CODE>.zip
+
+# 5. После работ — удалить вебхук на портале (docs/adapt-to-portal.md, шаг 8)
 ```
 
 ## Безопасность
