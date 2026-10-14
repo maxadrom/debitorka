@@ -16,6 +16,9 @@
 // без лишних запросов: число загруженных счетов = total из REST, без дублей, и «Итого»,
 // пересчитанное простой формулой по сырым счетам, = «Итого» отчёта (aggregator.js).
 // Свои скрипты сверки писать не нужно. Цифры записывай в docs/research.md (только итоги).
+//
+// В конце — блок «Для проверки в браузере»: те же цифры в формате интерфейса. Если сам
+// открыть браузер не можешь — передай этот блок человеку вместе с чек-листом шага 6.
 
 import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -25,6 +28,7 @@ import { loadReport } from '../modules/application/data-loader.js';
 import { collectionRate } from '../modules/application/aggregator.js';
 import { defaultFilters, toDateKey } from '../modules/application/filters.js';
 import { PORTAL } from '../modules/application/portal-config.js';
+import { formatMoney } from '../modules/presentation/ui-helpers.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const match = readFileSync(resolve(ROOT, '.env'), 'utf8').match(/^B24_WEBHOOK_URL=(\S+)/m);
@@ -114,6 +118,8 @@ console.log(`REST-запросов: ${requests}, ${((Date.now() - t0) / 1000).to
 
 // ---- Независимая сверка (по тем же сырым счетам, без кода data-loader/aggregator) ----
 console.log('\nНезависимая сверка:');
+// С доп. фильтрами пересчёт «Итого» не делается — проверяй разрезы: сумма «Итого» по всем
+// значениям фильтра (например, по каждому «Нашему ЮЛ») = «Итого» без фильтра.
 const ok = (cond, msg) => { console.log(`  ${cond ? '✅' : '❌'} ${msg}`); return cond; };
 const ids = new Set(raw.invoices.map((i) => i.id));
 let allOk = ok(raw.invoices.length === raw.total, `загружено счетов ${raw.invoices.length}, total из REST ${raw.total}`);
@@ -139,6 +145,23 @@ if (hasExtra) {
   allOk = ok(same(naive.paid, t.paid), `Оплачено: пересчёт ${money(naive.paid)}`) && allOk;
   allOk = ok(same(naive.overdue, t.overdue), `Просрочено: пересчёт ${money(naive.overdue)}`) && allOk;
 }
+// ---- Блок для человека: что он должен увидеть в браузере ----
+const ddmmyyyy = (iso) => (iso ? iso.split('-').reverse().join('.') : '—');
+const percent = new Intl.NumberFormat('ru-RU', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const extraFilters = Object.entries(filters)
+  .filter(([k, v]) => !k.startsWith('closedate') && (Array.isArray(v) ? v.length > 0 : v))
+  .map(([k, v]) => `${k}=${JSON.stringify(v)}`);
+console.log(`
+Для проверки в браузере (npm run serve → http://localhost:8081/index.html):
+  Срок оплаты: с ${ddmmyyyy(filters.closedateFrom)} по ${ddmmyyyy(filters.closedateTo)}; `
+  + `${extraFilters.length ? `фильтры: ${extraFilters.join(', ')}` : 'остальные фильтры сброшены'}
+  Итого · Должен всего:     ${formatMoney(t.amount)}
+  Итого · Оплачено:         ${formatMoney(t.paid)}
+  Итого · Просрочено:       ${formatMoney(t.overdue)}
+  Итого · Остаток к оплате: ${formatMoney(t.remain)}
+  % сбора дебиторки:        ${rate === null ? '—' : percent.format(rate)}
+  Строк: по клиентам ${report.byContact.size}, по сотрудникам ${report.byAssignee.size}`);
+
 if (!allOk) {
   console.log('\n❌ Расхождение. Не меняй код наугад: покажи вывод человеку и разберитесь вместе.');
   process.exitCode = 1;
