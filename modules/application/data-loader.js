@@ -15,12 +15,15 @@
 import * as defaultApiClient from '../infrastructure/api-client.js';
 import { BATCH_LIMIT } from '../infrastructure/api-client.js';
 import { aggregate, totals, STAGE_PAID } from './aggregator.js';
+import { PORTAL } from './portal-config.js';
 import { logInfo, logDebug } from '../env.js';
 
 const PAGE_SIZE = 50;
-const ENTITY_TYPE_INVOICE = 31;
+const ENTITY_TYPE_INVOICE = PORTAL.ENTITY_TYPE_INVOICE;
 // Финальная неуспешная стадия («Не оплачен», semantics F) — отсекаем серверным фильтром.
-const STAGE_FAILED = 'DT31_5:D';
+const STAGE_FAILED = PORTAL.STAGE_FAILED;
+// Поле «Дата оплаты» счёта.
+const PAY_DATE_FIELD = PORTAL.PAY_DATE_FIELD;
 
 const INVOICE_SELECT = [
   'id',
@@ -29,7 +32,7 @@ const INVOICE_SELECT = [
   'opportunity',
   'stageId',
   'closedate',
-  'ufCrmSmartInvoiceDatePay',
+  PAY_DATE_FIELD,
 ];
 
 const CONTACT_SELECT = ['ID', 'NAME', 'LAST_NAME', 'SECOND_NAME'];
@@ -95,10 +98,10 @@ async function loadContactsByIds(ids, apiClient) {
 }
 
 // Дата оплаты в диапазоне [from, to] (строки 'YYYY-MM-DD').
-// У оплаченного счёта без ufCrmSmartInvoiceDatePay датой оплаты считается срок
+// У оплаченного счёта без даты оплаты (PAY_DATE_FIELD) датой оплаты считается срок
 // оплаты (closedate) — решение пользователя 2026-10-08. Неоплаченный без даты → отсекаем.
 function isDatePayInRange(inv, from, to) {
-  const v = inv.ufCrmSmartInvoiceDatePay || (inv.stageId === STAGE_PAID ? inv.closedate : null);
+  const v = inv[PAY_DATE_FIELD] || (inv.stageId === STAGE_PAID ? inv.closedate : null);
   if (typeof v !== 'string' || v.length < 10) return false;
   const dp = v.slice(0, 10);
   return dp >= from && dp <= to;

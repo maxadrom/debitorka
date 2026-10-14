@@ -8,8 +8,8 @@ import assert from 'node:assert/strict';
 
 import { aggregate, totals, STAGE_PAID } from '../modules/application/aggregator.js';
 
-const STAGE_OVERDUE = 'DT31_5:S'; // активная стадия (любая ≠ STAGE_PAID и ≠ DT31_5:D)
-const STAGE_NEW = 'DT31_5:UC_VQM7R0';
+const STAGE_OVERDUE = STAGE_PAID.replace(/:.*$/, ':S'); // активная стадия (любая ≠ STAGE_PAID и ≠ «Не оплачен»)
+const STAGE_NEW = STAGE_PAID.replace(/:.*$/, ':UC_TEST');
 
 const today = new Date(2026, 3, 30); // 2026-04-30 (месяц 3 = апрель, локальная TZ)
 
@@ -19,20 +19,20 @@ test('1) пустой массив → пустая Map; totals = нули', () 
   assert.deepEqual(totals(result), { amount: 0, paid: 0, overdue: 0, remain: 0 });
 });
 
-test('2) один счёт DT31_5:P (closedate в прошлом) → paid=opp, overdue=0, remain=0', () => {
+test('2) один оплаченный счёт (STAGE_PAID, closedate в прошлом) → paid=opp, overdue=0, remain=0', () => {
   const inv = { id: 1, contactId: 100, opportunity: 1500, stageId: STAGE_PAID, closedate: '2026-04-01' };
   const result = aggregate([inv], today);
   const acc = result.get(100);
   assert.deepEqual(acc, { amount: 1500, paid: 1500, overdue: 0, remain: 0 });
 });
 
-test('3) счёт со stageId=DT31_5:S, closedate < today → overdue=opp, remain=opp, paid=0', () => {
+test('3) счёт в работе, closedate < today → overdue=opp, remain=opp, paid=0', () => {
   const inv = { id: 2, contactId: 100, opportunity: 700, stageId: STAGE_OVERDUE, closedate: '2026-04-01' };
   const result = aggregate([inv], today);
   assert.deepEqual(result.get(100), { amount: 700, paid: 0, overdue: 700, remain: 700 });
 });
 
-test('4) счёт со stageId=DT31_5:UC_*, closedate > today → remain=opp, overdue=0', () => {
+test('4) счёт в пользовательской стадии (UC_*), closedate > today → remain=opp, overdue=0', () => {
   const inv = { id: 3, contactId: 100, opportunity: 200, stageId: STAGE_NEW, closedate: '2026-05-15' };
   const result = aggregate([inv], today);
   assert.deepEqual(result.get(100), { amount: 200, paid: 0, overdue: 0, remain: 200 });
@@ -93,7 +93,7 @@ test('10) opportunity как строка → корректно складыв�
 
 test('11) closedate=null → счёт не помечается просроченным; aggregate(invoices, null) бросает понятную ошибку', () => {
   // 11a: счёт с closedate=null
-  const inv = { id: 1, contactId: 100, opportunity: 100, stageId: 'DT31_5:S', closedate: null };
+  const inv = { id: 1, contactId: 100, opportunity: 100, stageId: STAGE_OVERDUE, closedate: null };
   const result = aggregate([inv], today);
   const acc = result.get(100);
   assert.equal(acc.overdue, 0, 'closedate=null → не overdue ни при каком today');

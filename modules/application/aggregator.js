@@ -6,11 +6,13 @@
 // ререндере, любые сайд-эффекты замусорят логи.
 //
 // Контракт invoice'а:
-//   { id, contactId, opportunity, stageId, closedate, ufCrmSmartInvoiceDatePay? }
+//   { id, contactId, opportunity, stageId, closedate }
 // closedate приходит из crm.item.list в формате 'YYYY-MM-DDTHH:MM:SS+TZ' или Date.
 // Сравнение «просрочен ли» — строго по дате без времени и TZ.
 
-export const STAGE_PAID = 'DT31_5:P';
+import { PORTAL } from './portal-config.js';
+
+export const STAGE_PAID = PORTAL.STAGE_PAID;
 
 // dateOnly(input) → Date в локальной TZ с занулённым временем.
 // Принимает ISO-строку или Date.

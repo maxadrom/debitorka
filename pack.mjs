@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-// pack.mjs — упаковка локального приложения в dist/fin25_otch.zip.
+// pack.mjs — упаковка локального приложения в dist/<PORTAL.APP_CODE>.zip.
 //
 // Whitelist (в архиве): index.html, app.js, styles.css, modules/**/*.js,
 //   vendor/**, manifest/**.
@@ -10,13 +10,15 @@
 // Sanity-check: после сборки проверяем, что в архив не попало ничего из blacklist.
 // Размер: ZIP должен быть ≤ 500 KB.
 
-import { createWriteStream, mkdirSync, existsSync, statSync, readdirSync, readFileSync } from 'node:fs';
+import { createWriteStream, mkdirSync, existsSync, statSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { resolve, join, dirname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
+import { PORTAL } from './modules/application/portal-config.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)));
 const OUT_DIR = resolve(ROOT, 'dist');
-const OUT_PATH = resolve(OUT_DIR, 'fin25_otch.zip');
+const OUT_PATH = resolve(OUT_DIR, `${PORTAL.APP_CODE}.zip`);
 const SIZE_LIMIT_KB = 500;
 
 console.log('[pack] start');
@@ -92,14 +94,25 @@ function collectFiles() {
   return Array.from(files).sort();
 }
 
+// archiver (npm install) — основной путь; без него — системный `zip` (есть в macOS/Linux),
+// чтобы собрать архив можно было без npm install.
 async function getArchiver() {
   try {
     const mod = await import('archiver');
     return mod.default || mod;
+  } catch {
+    return null;
+  }
+}
+
+function zipWithSystemTool(files) {
+  try {
+    execFileSync('zip', ['-q', '-X', '-9', OUT_PATH, ...files], { cwd: ROOT, stdio: 'inherit' });
   } catch (err) {
-    console.error('[pack] archiver dep is missing — run `npm install`');
+    console.error('[pack] archiver dep is missing and system `zip` failed — run `npm install`');
     process.exit(1);
   }
+  return execFileSync('zipinfo', ['-1', OUT_PATH], { encoding: 'utf8' }).split('\n').filter(Boolean);
 }
 
 async function main() {
@@ -125,7 +138,15 @@ async function main() {
   }
 
   if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
+  if (existsSync(OUT_PATH)) rmSync(OUT_PATH);
   const archiver = await getArchiver();
+  const archivedNames = archiver ? await zipWithArchiver(archiver, files) : zipWithSystemTool(files);
+
+  console.log(`[pack] included ${archivedNames.length} files`);
+  checkArchive(archivedNames);
+}
+
+async function zipWithArchiver(archiver, files) {
   const archive = archiver('zip', { zlib: { level: 9 } });
   const out = createWriteStream(OUT_PATH);
 
@@ -149,9 +170,10 @@ async function main() {
 
   await archive.finalize();
   await new Promise((res) => out.on('close', res));
+  return archivedNames;
+}
 
-  console.log(`[pack] included ${archivedNames.length} files`);
-
+function checkArchive(archivedNames) {
   // Sanity-check ПОСЛЕ сборки: проверяем имена записей в архиве.
   for (const name of archivedNames) {
     if (isForbidden(name)) {

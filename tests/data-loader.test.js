@@ -8,6 +8,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { loadReport } from '../modules/application/data-loader.js';
+import { PORTAL } from '../modules/application/portal-config.js';
+
+const STAGE_OPEN = PORTAL.STAGE_PAID.replace(/:.*$/, ':S'); // любая стадия ≠ «Оплачен» и ≠ «Не оплачен»
+const PAY = PORTAL.PAY_DATE_FIELD;
 
 // ---------- Helpers ----------
 
@@ -16,9 +20,9 @@ function paidInv(id, contactId, opp, closedate = '2026-04-10', extra = {}) {
     id,
     contactId,
     opportunity: opp,
-    stageId: 'DT31_5:P',
+    stageId: PORTAL.STAGE_PAID,
     closedate,
-    ufCrmSmartInvoiceDatePay: null,
+    [PAY]: null,
     ...extra,
   };
 }
@@ -28,9 +32,9 @@ function openInv(id, contactId, opp, closedate = '2026-04-25', extra = {}) {
     id,
     contactId,
     opportunity: opp,
-    stageId: 'DT31_5:S',
+    stageId: STAGE_OPEN,
     closedate,
-    ufCrmSmartInvoiceDatePay: null,
+    [PAY]: null,
     ...extra,
   };
 }
@@ -164,11 +168,11 @@ test('2) с фильтром по ответственному: @assignedById Н
   assert.equal(out.totals.amount, 1000);
 });
 
-test('3) постфильтрация по ufCrmSmartInvoiceDatePay: оставляет только в диапазоне', async () => {
+test('3) постфильтрация по дате оплаты (PAY_DATE_FIELD): оставляет только в диапазоне', async () => {
   const invs = [
-    openInv(1, 100, 100, '2026-04-10', { ufCrmSmartInvoiceDatePay: null }),
-    openInv(2, 100, 200, '2026-04-15', { ufCrmSmartInvoiceDatePay: '2026-04-20' }), // в диапазоне
-    openInv(3, 100, 300, '2026-04-25', { ufCrmSmartInvoiceDatePay: '2026-05-15' }), // вне диапазона
+    openInv(1, 100, 100, '2026-04-10', { [PAY]: null }),
+    openInv(2, 100, 200, '2026-04-15', { [PAY]: '2026-04-20' }), // в диапазоне
+    openInv(3, 100, 300, '2026-04-25', { [PAY]: '2026-05-15' }), // вне диапазона
   ];
   const mock = makeMock({
     method(method) {
@@ -194,7 +198,7 @@ test('3b) оплаченный без даты оплаты → дата опл�
     paidInv(1, 100, 100, '2026-04-10'), // closedate в диапазоне оплаты → попадает
     paidInv(2, 100, 200, '2026-04-02'), // closedate вне диапазона оплаты → отсекается
     openInv(3, 100, 400, '2026-04-12'), // не оплачен, даты оплаты нет → отсекается
-    paidInv(4, 100, 800, '2026-04-12', { ufCrmSmartInvoiceDatePay: '2026-04-01' }), // своя дата приоритетнее
+    paidInv(4, 100, 800, '2026-04-12', { [PAY]: '2026-04-01' }), // своя дата приоритетнее
   ];
   const mock = makeMock({
     method(method) {
